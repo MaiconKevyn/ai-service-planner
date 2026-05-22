@@ -4,6 +4,10 @@
   "version": "0.0.0",
   "description": "UI local para comparar oportunidades de servicos com IA, Python e desenvolvimento no Brasil.",
   "type": "module",
+  "engines": {
+    "node": "^20.19.0 || >=22.12.0",
+    "npm": ">=10"
+  },
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",

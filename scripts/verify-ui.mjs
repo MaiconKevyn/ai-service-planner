@@ -26,6 +26,10 @@ for (let index = 0; index < cards; index += 1) {
   scores.push(await page.locator('.score-gauge span').innerText())
 }
 
+await page.locator('.opportunity-card').first().click()
+await page.getByRole('tab', { name: 'Use case real' }).click()
+const useCaseText = await page.locator('#real-usecase-panel').innerText()
+
 await browser.close()
 
 const failures = []
@@ -44,6 +48,20 @@ if (!bodyText.includes('Phone Number ID')) failures.push('Phone Number ID guidan
 if (!bodyText.includes('System User access token')) failures.push('System User token guidance missing.')
 if (!bodyText.includes('Cloud API Webhooks')) failures.push('Webhook documentation link missing.')
 if (!bodyText.includes('Message Templates')) failures.push('Message templates link missing.')
+if (!useCaseText.includes('Clínica fictícia Bella Forma')) failures.push('Real use case missing.')
+if (!useCaseText.includes('O que foi feito, por que e como')) {
+  failures.push('Use case decision section missing.')
+}
+if (!useCaseText.includes('Step by step do piloto')) failures.push('Use case step by step missing.')
+if (!useCaseText.includes('Fluxo de conversa usado na simulação')) {
+  failures.push('Use case conversation flow missing.')
+}
+if (!useCaseText.includes('Resultado simulado do piloto')) {
+  failures.push('Use case result section missing.')
+}
+if (!useCaseText.includes('Iteração depois do piloto')) {
+  failures.push('Use case iteration section missing.')
+}
 if (consoleErrors.length > 0) failures.push(`Console errors: ${consoleErrors.join(' | ')}`)
 
 if (failures.length > 0) {

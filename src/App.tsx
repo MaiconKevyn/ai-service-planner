@@ -12,6 +12,7 @@ import {
   Megaphone,
   Route,
   ShieldAlert,
+  Sparkles,
   Target,
   Users,
 } from 'lucide-react'
@@ -374,7 +375,9 @@ function ImplementationGuide({
 }: {
   guide: NonNullable<(typeof opportunities)[number]['implementationGuide']>
 }) {
+  const [activeTab, setActiveTab] = useState<'guide' | 'usecase'>('guide')
   const linkByLabel = new Map(guide.links.map((link) => [link.label, link]))
+  const hasUseCase = Boolean(guide.realUseCase)
 
   return (
     <section className="implementation-guide" aria-labelledby="implementation-title">
@@ -387,6 +390,58 @@ function ImplementationGuide({
         <ListChecks size={32} aria-hidden="true" />
       </div>
 
+      {hasUseCase ? (
+        <div className="implementation-tabs" role="tablist" aria-label="Seções do plano WhatsApp">
+          <button
+            className={activeTab === 'guide' ? 'active' : ''}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'guide'}
+            aria-controls="technical-guide-panel"
+            id="technical-guide-tab"
+            onClick={() => setActiveTab('guide')}
+          >
+            <ListChecks size={17} aria-hidden="true" />
+            Guia técnico
+          </button>
+          <button
+            className={activeTab === 'usecase' ? 'active' : ''}
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'usecase'}
+            aria-controls="real-usecase-panel"
+            id="real-usecase-tab"
+            onClick={() => setActiveTab('usecase')}
+          >
+            <Sparkles size={17} aria-hidden="true" />
+            Use case real
+          </button>
+        </div>
+      ) : null}
+
+      {activeTab === 'guide' ? (
+        <TechnicalGuidePanel guide={guide} linkByLabel={linkByLabel} />
+      ) : guide.realUseCase ? (
+        <RealUseCasePanel useCase={guide.realUseCase} />
+      ) : null}
+    </section>
+  )
+}
+
+function TechnicalGuidePanel({
+  guide,
+  linkByLabel,
+}: {
+  guide: NonNullable<(typeof opportunities)[number]['implementationGuide']>
+  linkByLabel: Map<string, (typeof guide.links)[number]>
+}) {
+  return (
+    <div
+      className="tab-panel-stack"
+      id="technical-guide-panel"
+      role="tabpanel"
+      aria-labelledby="technical-guide-tab"
+    >
       <div className="implementation-grid">
         {guide.easiestPath.map((item) => (
           <p key={item}>{item}</p>
@@ -511,7 +566,210 @@ function ImplementationGuide({
           ))}
         </div>
       </section>
-    </section>
+    </div>
+  )
+}
+
+function RealUseCasePanel({
+  useCase,
+}: {
+  useCase: NonNullable<
+    NonNullable<(typeof opportunities)[number]['implementationGuide']>['realUseCase']
+  >
+}) {
+  return (
+    <div
+      className="tab-panel-stack"
+      id="real-usecase-panel"
+      role="tabpanel"
+      aria-labelledby="real-usecase-tab"
+    >
+      <section className="usecase-hero" aria-labelledby="usecase-title">
+        <div>
+          <p className="eyebrow">{useCase.label}</p>
+          <h3 id="usecase-title">{useCase.title}</h3>
+          <p>{useCase.scenario}</p>
+        </div>
+        <aside>{useCase.disclaimer}</aside>
+      </section>
+
+      <section className="content-band" aria-labelledby="business-title">
+        <div className="section-heading">
+          <Users size={22} aria-hidden="true" />
+          <div>
+            <h3 id="business-title">Contexto da empresa simulada</h3>
+            <p>Cliente inventado para mostrar como o Plano 1 vira implantação vendável.</p>
+          </div>
+        </div>
+        <div className="business-profile">
+          <ProfileItem label="Empresa" value={useCase.business.name} />
+          <ProfileItem label="Nicho" value={useCase.business.niche} />
+          <ProfileItem label="Local" value={useCase.business.location} />
+          <ProfileItem label="Time" value={useCase.business.team} />
+          <ProfileItem label="Canais" value={useCase.business.channels} />
+        </div>
+        <div className="baseline-grid">
+          {useCase.baseline.map((item) => (
+            <article className="baseline-card" key={item.label}>
+              <span>{item.label}</span>
+              <strong>{item.value}</strong>
+              <p>{item.note}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <div className="two-column">
+        <section className="content-band" aria-labelledby="problem-title">
+          <div className="section-heading compact">
+            <ShieldAlert size={21} aria-hidden="true" />
+            <h3 id="problem-title">Problema encontrado</h3>
+          </div>
+          <ul className="risk-list">
+            {useCase.problem.map((problem) => (
+              <li key={problem}>{problem}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="content-band" aria-labelledby="architecture-title">
+          <div className="section-heading compact">
+            <Code2 size={21} aria-hidden="true" />
+            <h3 id="architecture-title">Como foi montado</h3>
+          </div>
+          <div className="stack-list">
+            {useCase.architecture.map((item) => (
+              <div className="stack-row" key={item.layer}>
+                <strong>{item.layer}</strong>
+                <span>{item.detail}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <section className="content-band" aria-labelledby="done-title">
+        <div className="section-heading">
+          <CheckCircle2 size={22} aria-hidden="true" />
+          <div>
+            <h3 id="done-title">O que foi feito, por que e como</h3>
+            <p>Decisões práticas para ligar atendimento, CRM, agenda e operação humana.</p>
+          </div>
+        </div>
+        <div className="done-grid">
+          {useCase.whatWasDone.map((item) => (
+            <article className="done-card" key={item.title}>
+              <h4>{item.title}</h4>
+              <dl>
+                <div>
+                  <dt>Por que</dt>
+                  <dd>{item.why}</dd>
+                </div>
+                <div>
+                  <dt>Como</dt>
+                  <dd>{item.how}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-band" aria-labelledby="usecase-step-title">
+        <div className="section-heading">
+          <Route size={22} aria-hidden="true" />
+          <div>
+            <h3 id="usecase-step-title">Step by step do piloto</h3>
+            <p>Sequência de 14 dias para sair da auditoria e chegar em métricas comerciais.</p>
+          </div>
+        </div>
+        <div className="implementation-steps">
+          {useCase.stepByStep.map((step) => (
+            <article className="implementation-step usecase-step" key={step.step}>
+              <div className="step-kicker">{step.step}</div>
+              <div>
+                <h4>{step.title}</h4>
+                <ul className="check-list">
+                  {step.actions.map((action) => (
+                    <li key={action}>{action}</li>
+                  ))}
+                </ul>
+                <p className="deliverable">
+                  <span>Entrega:</span> {step.deliverable}
+                </p>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-band" aria-labelledby="flow-title">
+        <div className="section-heading">
+          <Megaphone size={22} aria-hidden="true" />
+          <div>
+            <h3 id="flow-title">Fluxo de conversa usado na simulação</h3>
+            <p>Exemplos para deixar claro onde a IA ajuda e onde o humano assume.</p>
+          </div>
+        </div>
+        <div className="conversation-grid">
+          {useCase.conversationFlow.map((flow) => (
+            <article className="conversation-card" key={flow.customer}>
+              <span>Cliente</span>
+              <p>{flow.customer}</p>
+              <span>Sistema</span>
+              <p>{flow.system}</p>
+              <span>Regra humana</span>
+              <p>{flow.humanRule}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-band" aria-labelledby="result-title">
+        <div className="section-heading">
+          <CircleDollarSign size={22} aria-hidden="true" />
+          <div>
+            <h3 id="result-title">Resultado simulado do piloto</h3>
+            <p>Métricas plausíveis para explicar a proposta, não promessa de resultado garantido.</p>
+          </div>
+        </div>
+        <div className="result-table">
+          <div className="result-row result-head">
+            <strong>Métrica</strong>
+            <span>Antes</span>
+            <span>Depois</span>
+          </div>
+          {useCase.results.map((result) => (
+            <div className="result-row" key={result.label}>
+              <strong>{result.label}</strong>
+              <span>{result.before}</span>
+              <span>{result.after}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-band" aria-labelledby="iteration-title">
+        <div className="section-heading compact">
+          <Sparkles size={21} aria-hidden="true" />
+          <h3 id="iteration-title">Iteração depois do piloto</h3>
+        </div>
+        <ul className="check-list">
+          {useCase.nextIteration.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ul>
+      </section>
+    </div>
+  )
+}
+
+function ProfileItem({ label, value }: { label: string; value: string }) {
+  return (
+    <div>
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   )
 }
 

@@ -76,6 +76,51 @@ export type Opportunity = {
     }[]
     pitfalls: string[]
     followUpChecklist: string[]
+    realUseCase?: {
+      label: string
+      title: string
+      disclaimer: string
+      scenario: string
+      business: {
+        name: string
+        niche: string
+        location: string
+        team: string
+        channels: string
+      }
+      baseline: {
+        label: string
+        value: string
+        note: string
+      }[]
+      problem: string[]
+      whatWasDone: {
+        title: string
+        why: string
+        how: string
+      }[]
+      stepByStep: {
+        step: string
+        title: string
+        actions: string[]
+        deliverable: string
+      }[]
+      conversationFlow: {
+        customer: string
+        system: string
+        humanRule: string
+      }[]
+      architecture: {
+        layer: string
+        detail: string
+      }[]
+      results: {
+        label: string
+        before: string
+        after: string
+      }[]
+      nextIteration: string[]
+    }
   }
 }
 
@@ -404,6 +449,194 @@ export const opportunities: Opportunity[] = [
         'Criar 2 templates utilitários aprováveis: confirmação de agenda e follow-up de orçamento.',
         'Medir no piloto: primeira resposta, leads qualificados, agendamentos e handoffs.',
       ],
+      realUseCase: {
+        label: 'Use case realista',
+        title: 'Clínica fictícia Bella Forma: WhatsApp que qualifica, agenda e salva follow-up',
+        disclaimer:
+          'Cenário fictício, criado para simular um piloto realista de 14 dias para uma clínica de estética local.',
+        scenario:
+          'A Bella Forma recebe leads de Instagram Ads e Google Maps para limpeza de pele, botox e depilação a laser. A recepção responde quando dá, mas perde contato fora do horário, não registra origem do lead e esquece retorno depois que a pessoa pergunta preço.',
+        business: {
+          name: 'Bella Forma Estética',
+          niche: 'Clínica de estética com procedimentos de recorrência e ticket médio de R$ 280 a R$ 900.',
+          location: 'Bairro comercial de Belo Horizonte, com concorrentes próximos e demanda por WhatsApp.',
+          team: '1 dona, 2 profissionais de atendimento, 4 especialistas em procedimentos.',
+          channels: 'Instagram Ads, Google Maps, indicação de clientes e WhatsApp Business.',
+        },
+        baseline: [
+          {
+            label: 'Leads por mês',
+            value: '210',
+            note: 'Entravam pelo WhatsApp, mas sem CRM ou status confiável.',
+          },
+          {
+            label: 'Primeira resposta',
+            value: '2h a 8h',
+            note: 'Fora do expediente, muitos contatos só eram vistos no dia seguinte.',
+          },
+          {
+            label: 'Agendamentos',
+            value: '34/mês',
+            note: 'A clínica não sabia quais vieram de anúncio, indicação ou retorno manual.',
+          },
+          {
+            label: 'Follow-ups',
+            value: 'manual',
+            note: 'Dependia de lembrar conversa por conversa no WhatsApp Business.',
+          },
+        ],
+        problem: [
+          'Contato perguntava preço, recebia resposta genérica e sumia sem próximo passo.',
+          'Recepção repetia as mesmas perguntas sobre procedimento, contraindicações e horários.',
+          'Não existia status de funil: novo lead, qualificado, aguardando agenda, agendado, perdido.',
+          'A dona não tinha resumo diário de oportunidades paradas nem motivo de perda.',
+        ],
+        whatWasDone: [
+          {
+            title: 'Triagem automática com limite claro',
+            why: 'Reduzir tempo de primeira resposta sem deixar a IA decidir preço final ou orientação clínica.',
+            how: 'O bot perguntava procedimento, objetivo, melhor horário, origem e se havia urgência. Reclamação, contraindicação, negociação e dúvida médica eram transferidas para humano.',
+          },
+          {
+            title: 'Mini-CRM por status',
+            why: 'Transformar conversas soltas em pipeline simples que a dona consegue revisar em 10 minutos.',
+            how: 'Cada contato ganhava status, origem, interesse, última mensagem, próximo passo e prazo de follow-up. Leads sem resposta viravam alerta.',
+          },
+          {
+            title: 'Agenda assistida',
+            why: 'Aumentar conversão quando o cliente demonstra intenção forte, sem esperar a recepção abrir agenda manualmente.',
+            how: 'O sistema oferecia 3 janelas de horário vindas do Google Calendar. A confirmação final continuava com humano no piloto.',
+          },
+          {
+            title: 'Resumo diário para decisão',
+            why: 'A dona precisava enxergar venda perdida, gargalos e retorno de anúncio sem abrir 200 conversas.',
+            how: 'Todo fim de dia o painel mostrava novos leads, leads qualificados, agendamentos, pendências e principais perguntas repetidas.',
+          },
+        ],
+        stepByStep: [
+          {
+            step: 'Dia 1',
+            title: 'Auditoria de conversas e desenho do funil',
+            actions: [
+              'Exportar ou revisar 40 conversas recentes com consentimento operacional da clínica.',
+              'Classificar perguntas repetidas, motivos de perda, tempo de resposta e casos que exigem humano.',
+              'Definir 5 status: novo, qualificado, aguardando agenda, agendado e perdido.',
+            ],
+            deliverable: 'Mapa do funil do WhatsApp e lista das 18 perguntas frequentes do MVP.',
+          },
+          {
+            step: 'Dias 2-3',
+            title: 'Setup técnico do WhatsApp oficial',
+            actions: [
+              'Criar app Business na Meta e validar envio com número de teste.',
+              'Subir webhook HTTPS para receber mensagens e status de entrega.',
+              'Salvar token, Phone Number ID e WABA ID apenas no backend.',
+            ],
+            deliverable: 'Backend enviando mensagem de teste e recebendo evento inbound no webhook.',
+          },
+          {
+            step: 'Dias 4-5',
+            title: 'Construção do fluxo de triagem',
+            actions: [
+              'Escrever prompts com regras de limite: não diagnosticar, não prometer resultado e não negociar desconto.',
+              'Criar coleta estruturada de nome, procedimento, objetivo, disponibilidade e origem.',
+              'Adicionar handoff para humano quando houver reclamação, saúde, preço sensível ou pedido fora do script.',
+            ],
+            deliverable: 'Fluxo conversacional testado com 12 simulações de lead.',
+          },
+          {
+            step: 'Dias 6-8',
+            title: 'Mini-CRM e alertas de follow-up',
+            actions: [
+              'Criar painel com cards por status e busca por telefone/nome.',
+              'Gerar alerta quando lead qualificado fica 4 horas sem próximo passo.',
+              'Registrar evento de agendamento, perda e transferência para humano.',
+            ],
+            deliverable: 'Dashboard operacional para recepção e resumo diário para a dona.',
+          },
+          {
+            step: 'Dias 9-14',
+            title: 'Piloto controlado e revisão',
+            actions: [
+              'Rodar só para limpeza de pele e depilação, sem ativar todos os procedimentos.',
+              'Revisar diariamente 10 conversas para ajustar respostas e regras de handoff.',
+              'Comparar agendamentos, tempo de resposta e motivos de perda com a linha de base.',
+            ],
+            deliverable: 'Relatório de piloto com métricas, prints do funil e próximos ajustes.',
+          },
+        ],
+        conversationFlow: [
+          {
+            customer: '“Oi, quanto custa limpeza de pele?”',
+            system:
+              'Responde com faixa orientativa aprovada, pergunta objetivo e oferece avaliação/agenda sem fechar preço clínico definitivo.',
+            humanRule: 'Se pedir desconto, pacote ou condição especial, cria tarefa para recepção assumir.',
+          },
+          {
+            customer: '“Tenho melasma, posso fazer?”',
+            system:
+              'Não orienta clinicamente. Coleta contexto básico e encaminha para especialista com etiqueta “dúvida clínica”.',
+            humanRule: 'Toda contraindicação, sintoma, gestação, alergia ou condição de pele vai para humano.',
+          },
+          {
+            customer: '“Tem horário sábado de manhã?”',
+            system:
+              'Consulta janelas disponíveis, sugere opções e pede confirmação de nome completo antes de reservar.',
+            humanRule: 'No piloto, confirmação final de agenda fica com recepção até validar no-show e conflitos.',
+          },
+        ],
+        architecture: [
+          {
+            layer: 'WhatsApp Cloud API',
+            detail: 'Recebe e envia mensagens oficiais; webhook alimenta a fila de processamento.',
+          },
+          {
+            layer: 'FastAPI',
+            detail: 'Valida webhook, normaliza payload, aplica regras de segurança e chama a camada de IA.',
+          },
+          {
+            layer: 'IA com guardrails',
+            detail: 'Responde FAQ, coleta campos e classifica intenção; não decide tema clínico ou comercial sensível.',
+          },
+          {
+            layer: 'PostgreSQL',
+            detail: 'Guarda contato, conversa, status, origem, próxima ação e trilha de auditoria.',
+          },
+          {
+            layer: 'Dashboard React',
+            detail: 'Mostra pipeline, resumo diário, alertas de lead parado e histórico por contato.',
+          },
+        ],
+        results: [
+          {
+            label: 'Tempo de primeira resposta',
+            before: '2h a 8h',
+            after: 'menos de 1 minuto para triagem inicial',
+          },
+          {
+            label: 'Leads classificados',
+            before: 'sem registro',
+            after: '82% dos contatos com procedimento, origem e próximo passo',
+          },
+          {
+            label: 'Agendamentos rastreados',
+            before: '34/mês sem origem confiável',
+            after: '19 agendamentos rastreados em 14 dias de piloto',
+          },
+          {
+            label: 'Handoff humano',
+            before: 'conversa ficava perdida no WhatsApp',
+            after: '31 transferências com motivo explícito e prioridade',
+          },
+        ],
+        nextIteration: [
+          'Criar templates aprovados para confirmação de agenda e retorno de orçamento fora da janela de 24h.',
+          'Adicionar integração real com Google Calendar para reservar horário automaticamente.',
+          'Separar relatórios por origem: Instagram Ads, Google Maps, indicação e retorno.',
+          'Medir no-show e criar lembrete automático com opção de remarcar.',
+          'Transformar o fluxo validado em pacote de implantação para outras clínicas de estética.',
+        ],
+      },
     },
   },
   {

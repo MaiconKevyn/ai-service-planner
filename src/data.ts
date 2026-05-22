@@ -52,6 +52,31 @@ export type Opportunity = {
   }[]
   risks: string[]
   firstExperiment: string
+  implementationGuide?: {
+    title: string
+    summary: string
+    easiestPath: string[]
+    credentials: {
+      name: string
+      where: string
+      use: string
+      productionNote: string
+    }[]
+    steps: {
+      phase: string
+      title: string
+      objective: string
+      tasks: string[]
+      links: string[]
+    }[]
+    links: {
+      label: string
+      url: string
+      note: string
+    }[]
+    pitfalls: string[]
+    followUpChecklist: string[]
+  }
 }
 
 export const opportunities: Opportunity[] = [
@@ -192,6 +217,194 @@ export const opportunities: Opportunity[] = [
     ],
     firstExperiment:
       'Monte uma demo para clínica de estética com 20 perguntas frequentes, agenda falsa e relatório de leads. Mostre para 10 donos e tente vender 2 pilotos pagos.',
+    implementationGuide: {
+      title: 'Caminho mais fácil para implementar com WhatsApp Cloud API',
+      summary:
+        'Comece pelo Cloud API oficial da Meta. Use o número de teste e token temporário para provar envio/recebimento, depois gere um token de System User, conecte um número real e só então cobre o piloto.',
+      easiestPath: [
+        'Não comece por BSP pago nem por automação não oficial de WhatsApp Web. O caminho mais limpo para o MVP é Cloud API direto pela Meta.',
+        'Primeiro objetivo técnico: enviar uma mensagem de teste via endpoint `/messages` e receber uma mensagem no webhook HTTPS.',
+        'Primeiro objetivo comercial: rodar um fluxo pequeno de triagem, agenda e handoff humano para um nicho, sem prometer atendimento autônomo total.',
+      ],
+      credentials: [
+        {
+          name: 'Temporary access token',
+          where: 'Meta Developers > seu App > WhatsApp > API Setup ou Quickstart.',
+          use: 'Serve para testar o primeiro envio com o número de teste da Meta.',
+          productionNote:
+            'Expira e não deve ir para produção. Troque por token de System User antes do piloto real.',
+        },
+        {
+          name: 'Phone Number ID',
+          where: 'Meta Developers > WhatsApp > API Setup, junto do número de teste ou número real.',
+          use: 'Entra na URL `https://graph.facebook.com/vXX.X/{PHONE_NUMBER_ID}/messages`.',
+          productionNote:
+            'Cada número real tem seu próprio ID. Não confunda com o telefone em formato +55.',
+        },
+        {
+          name: 'WhatsApp Business Account ID (WABA ID)',
+          where: 'Meta Developers > WhatsApp > API Setup ou WhatsApp Manager.',
+          use: 'Usado para gerenciar números, templates e ativos da conta WhatsApp Business.',
+          productionNote:
+            'Guarde junto do Business Manager correto, principalmente se atender mais de um cliente.',
+        },
+        {
+          name: 'System User access token',
+          where: 'Meta Business Settings > Users > System Users > Generate token.',
+          use: 'Token estável para backend, com permissões `whatsapp_business_messaging` e `whatsapp_business_management`.',
+          productionNote:
+            'Use em variável de ambiente, nunca no frontend. Revogue e regenere se vazar.',
+        },
+        {
+          name: 'Webhook verify token e App Secret',
+          where: 'Você define o verify token no backend; o App Secret fica em Meta Developers > App Settings.',
+          use: 'O verify token valida a configuração inicial do webhook; o App Secret ajuda a verificar assinatura de eventos.',
+          productionNote:
+            'Webhook precisa estar em HTTPS público. Para dev local, use túnel como ngrok ou Cloudflare Tunnel.',
+        },
+      ],
+      steps: [
+        {
+          phase: 'Passo 1',
+          title: 'Criar App e habilitar WhatsApp',
+          objective:
+            'Ter um app Business no Meta Developers com produto WhatsApp ativo e acesso ao painel API Setup.',
+          tasks: [
+            'Entrar em Meta for Developers e criar um app do tipo Business.',
+            'Adicionar o produto WhatsApp ao app.',
+            'Criar ou selecionar uma Meta Business Account para vincular ao app.',
+            'Abrir WhatsApp > API Setup/Quickstart e localizar token temporário, Phone Number ID e WABA ID.',
+          ],
+          links: ['Meta Developers Apps', 'Cloud API Get Started'],
+        },
+        {
+          phase: 'Passo 2',
+          title: 'Enviar a primeira mensagem',
+          objective:
+            'Provar que o token, o Phone Number ID e o número de destino estão corretos antes de construir o bot.',
+          tasks: [
+            'Adicionar seu telefone como destinatário de teste no painel da Meta.',
+            'Enviar uma mensagem `hello_world` ou texto de teste para seu número.',
+            'Guardar no `.env` apenas do backend: `WHATSAPP_TOKEN`, `WHATSAPP_PHONE_NUMBER_ID`, `WHATSAPP_WABA_ID` e `WHATSAPP_GRAPH_VERSION`.',
+            'Implementar uma função backend simples `sendWhatsAppMessage(to, body)` usando `POST /{PHONE_NUMBER_ID}/messages`.',
+          ],
+          links: ['Send Messages Guide', 'Meta Postman Collection'],
+        },
+        {
+          phase: 'Passo 3',
+          title: 'Criar webhook de entrada',
+          objective:
+            'Receber mensagens de clientes e status de entrega para alimentar CRM, IA e handoff humano.',
+          tasks: [
+            'Criar endpoint público `GET /webhooks/whatsapp` para validação do verify token.',
+            'Criar endpoint `POST /webhooks/whatsapp` para receber eventos de mensagens e status.',
+            'Configurar a URL HTTPS no painel WhatsApp > Configuration.',
+            'Assinar o campo `messages` para receber mensagens inbound e atualizações.',
+            'Salvar payload bruto, telefone do contato, texto, timestamp e `wamid` antes de chamar a IA.',
+          ],
+          links: ['Cloud API Webhooks', 'ngrok Facebook Webhooks'],
+        },
+        {
+          phase: 'Passo 4',
+          title: 'Trocar teste por produção',
+          objective:
+            'Sair do token temporário e preparar um piloto real sem depender de credencial pessoal.',
+          tasks: [
+            'Criar System User no Business Settings e gerar token com `whatsapp_business_messaging` e `whatsapp_business_management`.',
+            'Adicionar um número real no WhatsApp Manager ou registrar um número dedicado ao cliente.',
+            'Configurar forma de pagamento e checar pricing por país/categoria antes de rodar volume.',
+            'Validar nome de exibição, Business Manager, permissões e acesso do app ao WABA.',
+          ],
+          links: ['Business Settings', 'WhatsApp Manager', 'Platform Pricing'],
+        },
+        {
+          phase: 'Passo 5',
+          title: 'Templates, janela de 24h e piloto',
+          objective:
+            'Evitar bloqueio de mensagens e deixar claro quando pode responder livremente ou quando precisa de template aprovado.',
+          tasks: [
+            'Usar mensagem livre apenas dentro da janela de atendimento de 24h aberta pelo cliente.',
+            'Criar templates de utilidade para confirmação de agenda, lembrete e retorno de orçamento.',
+            'Adicionar opt-in claro no formulário, landing page ou conversa inicial.',
+            'No MVP, limitar IA a FAQ, triagem e coleta de dados; transferir preço, reclamação e exceção para humano.',
+          ],
+          links: ['Message Templates', 'Platform Pricing'],
+        },
+      ],
+      links: [
+        {
+          label: 'Cloud API Get Started',
+          url: 'https://developers.facebook.com/docs/whatsapp/cloud-api/get-started',
+          note: 'Primeiro setup: app, WhatsApp, token temporário, número de teste e IDs.',
+        },
+        {
+          label: 'Cloud API Overview',
+          url: 'https://developers.facebook.com/docs/whatsapp/cloud-api/',
+          note: 'Visão geral oficial da Cloud API, WABA, número de telefone e webhooks.',
+        },
+        {
+          label: 'Send Messages Guide',
+          url: 'https://developers.facebook.com/docs/whatsapp/cloud-api/guides/send-messages',
+          note: 'Referência prática para enviar texto, templates, mídia e mensagens interativas.',
+        },
+        {
+          label: 'Cloud API Webhooks',
+          url: 'https://developers.facebook.com/docs/whatsapp/cloud-api/webhooks',
+          note: 'Configuração do endpoint HTTPS e eventos recebidos pelo backend.',
+        },
+        {
+          label: 'Message Templates',
+          url: 'https://developers.facebook.com/docs/whatsapp/business-management-api/message-templates',
+          note: 'Criação e gestão de templates para mensagens fora da janela de 24h.',
+        },
+        {
+          label: 'WhatsApp Platform Pricing',
+          url: 'https://whatsappbusiness.com/products/platform-pricing/',
+          note: 'Preço por mensagem entregue, categoria e país. Recalcular antes de proposta.',
+        },
+        {
+          label: 'Meta Developers Apps',
+          url: 'https://developers.facebook.com/apps/',
+          note: 'Painel para criar app, adicionar WhatsApp e acessar API Setup.',
+        },
+        {
+          label: 'Business Settings',
+          url: 'https://business.facebook.com/settings/',
+          note: 'Onde criar System User, gerar token permanente e gerenciar permissões.',
+        },
+        {
+          label: 'WhatsApp Manager',
+          url: 'https://business.facebook.com/wa/manage/',
+          note: 'Gerenciar número, nome de exibição, templates e conta WhatsApp Business.',
+        },
+        {
+          label: 'Meta Postman Collection',
+          url: 'https://www.postman.com/meta/whatsapp-business-platform/overview',
+          note: 'Coleção útil para testar chamadas antes de escrever código.',
+        },
+        {
+          label: 'ngrok Facebook Webhooks',
+          url: 'https://ngrok.com/docs/integrations/webhooks/facebook-webhooks/',
+          note: 'Atalho para testar webhook local com HTTPS público.',
+        },
+      ],
+      pitfalls: [
+        'O token temporário do Quickstart é bom para teste, mas quebra piloto real quando expira.',
+        'Phone Number ID não é o número de telefone; usar o valor errado gera erro no endpoint.',
+        'Número já usado no WhatsApp pessoal ou Business App pode exigir migração/coexistência antes de usar Cloud API.',
+        'Mensagens iniciadas pela empresa fora da janela de 24h precisam de template aprovado.',
+        'Nunca coloque token, App Secret ou WABA ID sensível no React; tudo fica no backend.',
+      ],
+      followUpChecklist: [
+        'Criar app Business na Meta e abrir WhatsApp > API Setup.',
+        'Enviar primeira mensagem para seu próprio número usando token temporário.',
+        'Subir endpoint HTTPS de webhook e assinar `messages`.',
+        'Criar System User token para produção e salvar em secret manager ou `.env` do backend.',
+        'Desenhar 3 fluxos do piloto: qualificação, agendamento e handoff humano.',
+        'Criar 2 templates utilitários aprováveis: confirmação de agenda e follow-up de orçamento.',
+        'Medir no piloto: primeira resposta, leads qualificados, agendamentos e handoffs.',
+      ],
+    },
   },
   {
     id: 'document-automation',

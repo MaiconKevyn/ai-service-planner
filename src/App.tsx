@@ -5,7 +5,10 @@ import {
   CircleDollarSign,
   Code2,
   ExternalLink,
+  KeyRound,
   Lightbulb,
+  Link2,
+  ListChecks,
   Megaphone,
   Route,
   ShieldAlert,
@@ -257,6 +260,10 @@ function App() {
             </div>
             <ArrowRight size={28} aria-hidden="true" />
           </section>
+
+          {selected.implementationGuide ? (
+            <ImplementationGuide guide={selected.implementationGuide} />
+          ) : null}
         </section>
       </section>
 
@@ -359,6 +366,152 @@ function MarketingTile({ label, value }: { label: string; value: string }) {
       <span>{label}</span>
       <p>{value}</p>
     </div>
+  )
+}
+
+function ImplementationGuide({
+  guide,
+}: {
+  guide: NonNullable<(typeof opportunities)[number]['implementationGuide']>
+}) {
+  const linkByLabel = new Map(guide.links.map((link) => [link.label, link]))
+
+  return (
+    <section className="implementation-guide" aria-labelledby="implementation-title">
+      <div className="implementation-hero">
+        <div>
+          <p className="eyebrow">Implementação prática</p>
+          <h3 id="implementation-title">{guide.title}</h3>
+          <p>{guide.summary}</p>
+        </div>
+        <ListChecks size={32} aria-hidden="true" />
+      </div>
+
+      <div className="implementation-grid">
+        {guide.easiestPath.map((item) => (
+          <p key={item}>{item}</p>
+        ))}
+      </div>
+
+      <section className="content-band" aria-labelledby="credentials-title">
+        <div className="section-heading">
+          <KeyRound size={22} aria-hidden="true" />
+          <div>
+            <h3 id="credentials-title">Credenciais que você realmente precisa</h3>
+            <p>
+              Não é uma API key única. A Cloud API usa token de acesso, IDs do WhatsApp Business e
+              webhook verificado no backend.
+            </p>
+          </div>
+        </div>
+        <div className="credential-grid">
+          {guide.credentials.map((credential) => (
+            <article className="credential-card" key={credential.name}>
+              <h4>{credential.name}</h4>
+              <dl>
+                <div>
+                  <dt>Onde pegar</dt>
+                  <dd>{credential.where}</dd>
+                </div>
+                <div>
+                  <dt>Uso</dt>
+                  <dd>{credential.use}</dd>
+                </div>
+                <div>
+                  <dt>Produção</dt>
+                  <dd>{credential.productionNote}</dd>
+                </div>
+              </dl>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="content-band" aria-labelledby="whatsapp-step-title">
+        <div className="section-heading">
+          <Route size={22} aria-hidden="true" />
+          <div>
+            <h3 id="whatsapp-step-title">Step by step técnico</h3>
+            <p>Ordem recomendada para sair do painel da Meta e chegar em um piloto vendável.</p>
+          </div>
+        </div>
+        <div className="implementation-steps">
+          {guide.steps.map((step) => (
+            <article className="implementation-step" key={step.phase}>
+              <div className="step-kicker">{step.phase}</div>
+              <div>
+                <h4>{step.title}</h4>
+                <p>{step.objective}</p>
+                <ul className="check-list">
+                  {step.tasks.map((task) => (
+                    <li key={task}>{task}</li>
+                  ))}
+                </ul>
+                <div className="inline-links" aria-label={`Links para ${step.title}`}>
+                  {step.links.map((label) => {
+                    const link = linkByLabel.get(label)
+                    if (!link) return null
+                    return (
+                      <a href={link.url} key={label} target="_blank" rel="noreferrer">
+                        {label}
+                        <ExternalLink size={13} aria-hidden="true" />
+                      </a>
+                    )
+                  })}
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <div className="two-column">
+        <section className="content-band" aria-labelledby="pitfalls-title">
+          <div className="section-heading compact">
+            <ShieldAlert size={21} aria-hidden="true" />
+            <h3 id="pitfalls-title">Erros que travam o follow-up</h3>
+          </div>
+          <ul className="risk-list">
+            {guide.pitfalls.map((pitfall) => (
+              <li key={pitfall}>{pitfall}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="content-band" aria-labelledby="checklist-title">
+          <div className="section-heading compact">
+            <CheckCircle2 size={21} aria-hidden="true" />
+            <h3 id="checklist-title">Checklist do próximo follow-up</h3>
+          </div>
+          <ul className="check-list">
+            {guide.followUpChecklist.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+      </div>
+
+      <section className="content-band" aria-labelledby="docs-title">
+        <div className="section-heading">
+          <Link2 size={22} aria-hidden="true" />
+          <div>
+            <h3 id="docs-title">Documentação e tutoriais para abrir depois</h3>
+            <p>Links oficiais e atalhos práticos para configurar, testar e precificar o piloto.</p>
+          </div>
+        </div>
+        <div className="doc-link-grid">
+          {guide.links.map((link) => (
+            <a href={link.url} key={link.url} target="_blank" rel="noreferrer">
+              <strong>
+                {link.label}
+                <ExternalLink size={14} aria-hidden="true" />
+              </strong>
+              <span>{link.note}</span>
+            </a>
+          ))}
+        </div>
+      </section>
+    </section>
   )
 }
 

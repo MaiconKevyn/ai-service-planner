@@ -36,6 +36,14 @@ if (!bodyText.includes('Glossário de marketing para devs')) failures.push('Glos
 if (!bodyText.includes('Custo estimado do bolso')) failures.push('Cost section missing.')
 if (!bodyText.includes('Plano de desenvolvimento')) failures.push('Development plan missing.')
 if (!bodyText.includes('Leads e clientes ideais')) failures.push('Lead section missing.')
+if (!bodyText.includes('Caminho mais fácil para implementar com WhatsApp Cloud API')) {
+  failures.push('WhatsApp implementation guide missing.')
+}
+if (!bodyText.includes('Temporary access token')) failures.push('Temporary token guidance missing.')
+if (!bodyText.includes('Phone Number ID')) failures.push('Phone Number ID guidance missing.')
+if (!bodyText.includes('System User access token')) failures.push('System User token guidance missing.')
+if (!bodyText.includes('Cloud API Webhooks')) failures.push('Webhook documentation link missing.')
+if (!bodyText.includes('Message Templates')) failures.push('Message templates link missing.')
 if (consoleErrors.length > 0) failures.push(`Console errors: ${consoleErrors.join(' | ')}`)
 
 if (failures.length > 0) {
